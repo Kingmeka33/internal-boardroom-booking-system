@@ -28,7 +28,7 @@ export class Boardroom {
   @Column({ default: 240 }) maximumBookingMinutes: number;
   @Column({ default: 0 }) bufferTimeBeforeMinutes: number;
   @Column({ default: 0 }) bufferTimeAfterMinutes: number;
-  @ManyToMany(() => Amenity, { eager: true })
+  @ManyToMany(() => Amenity)
   @JoinTable({ name: "boardroom_amenities" })
   amenities: Amenity[];
   @CreateDateColumn() createdAt: Date;
