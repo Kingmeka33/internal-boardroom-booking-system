@@ -1,18 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Role } from "./role.entity";
+import { Permission } from "./permission.entity";
 @Injectable()
-export class RolesService {
-  constructor(@InjectRepository(Role) private repo: Repository<Role>) {}
-  async findAll(): Promise<Role[]> {
+export class PermissionsService {
+  constructor(
+    @InjectRepository(Permission) private repo: Repository<Permission>,
+  ) {}
+  async findAll(): Promise<Permission[]> {
     try {
       return this.repo.find();
     } catch (e) {
       throw e;
     }
   }
-  async create(payload: any): Promise<Role | Role[]> {
+  async create(payload: any): Promise<Permission | Permission[]> {
     try {
       const entity = this.repo.create(payload);
       return this.repo.save(entity);
