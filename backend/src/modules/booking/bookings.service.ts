@@ -35,7 +35,7 @@ export class BookingsService {
     private readonly settings: Repository<SystemSetting>,
   ) {}
 
-  async create(dto: CreateBookingDto, user: User) {
+  async create(dto: CreateBookingDto, user: User): Promise<Booking> {
     try {
       const room = await this.rooms.findOne({ where: { id: dto.boardroomId } });
       if (!room) throw new NotFoundException("Boardroom not found");
@@ -178,7 +178,7 @@ export class BookingsService {
     start: Date,
     end: Date,
     excludeBookingId?: string,
-  ) {
+  ): Promise<void> {
     try {
       const bookingQuery = this.bookings
         .createQueryBuilder("booking")
@@ -218,7 +218,7 @@ export class BookingsService {
     }
   }
 
-  async myBookings(user: User) {
+  async myBookings(user: User): Promise<Booking[]> {
     try {
       return this.bookings.find({
         where: { bookedByUser: { id: user.id } },
@@ -229,7 +229,7 @@ export class BookingsService {
     }
   }
 
-  async findAll(query: Record<string, string> = {}) {
+  async findAll(query: Record<string, string> = {}): Promise<Booking[]> {
     try {
       const qb = this.bookings
         .createQueryBuilder("booking")
@@ -257,7 +257,7 @@ export class BookingsService {
     }
   }
 
-  async calendar(query: Record<string, string> = {}) {
+  async calendar(query: Record<string, string> = {}): Promise<any[]> {
     try {
       const bookings = await this.findAll(query);
       return bookings.map((booking) => ({
@@ -276,7 +276,7 @@ export class BookingsService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Booking> {
     try {
       const booking = await this.bookings.findOne({ where: { id } });
       if (!booking) throw new NotFoundException("Booking not found");
@@ -286,7 +286,7 @@ export class BookingsService {
     }
   }
 
-  async update(id: string, dto: Partial<CreateBookingDto>, user: User) {
+  async update(id: string, dto: Partial<CreateBookingDto>, user: User): Promise<Booking> {
     try {
       const booking = await this.findOne(id);
       const before = this.safeBooking(booking);
@@ -369,7 +369,7 @@ export class BookingsService {
     }
   }
 
-  async approve(id: string, user: User) {
+  async approve(id: string, user: User): Promise<Booking> {
     try {
       const booking = await this.findOne(id);
       const before = this.safeBooking(booking);
@@ -409,7 +409,7 @@ export class BookingsService {
     }
   }
 
-  async reject(id: string, user: User, reason: string) {
+  async reject(id: string, user: User, reason: string): Promise<Booking> {
     try {
       const booking = await this.findOne(id);
       const before = this.safeBooking(booking);
@@ -446,7 +446,7 @@ export class BookingsService {
     }
   }
 
-  async cancel(id: string, user: User, reason?: string) {
+  async cancel(id: string, user: User, reason?: string): Promise<Booking> {
     try {
       const booking = await this.findOne(id);
       const before = this.safeBooking(booking);
@@ -501,7 +501,7 @@ export class BookingsService {
     }
   }
 
-  async complete(id: string, user?: User) {
+  async complete(id: string, user?: User): Promise<Booking> {
     try {
       const booking = await this.findOne(id);
       const before = this.safeBooking(booking);
