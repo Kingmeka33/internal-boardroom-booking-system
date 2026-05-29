@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { SystemSetting } from "./system-setting.entity";
+import { SystemSettingResponseDto } from "./dto/system-setting-response.dto";
 
 @Injectable()
 export class SystemSettingsService {
@@ -10,15 +11,16 @@ export class SystemSettingsService {
     private readonly settings: Repository<SystemSetting>,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<SystemSettingResponseDto[]> {
     try {
-      return this.settings.find({ order: { key: "ASC" } });
+      const results = await this.settings.find({ order: { key: "ASC" } });
+      return results.map((s) => this.toResponseDto(s));
     } catch (error) {
       throw error;
     }
   }
 
-  async getValue(key: string, fallback?: string) {
+  async getValue(key: string, fallback?: string): Promise<string | undefined> {
     try {
       const setting = await this.settings.findOne({ where: { key } });
       return setting?.value ?? fallback;
@@ -27,7 +29,7 @@ export class SystemSettingsService {
     }
   }
 
-  async update(key: string, value: string) {
+  async update(key: string, value: string): Promise<SystemSettingResponseDto> {
     try {
       const setting = await this.settings.findOne({ where: { key } });
 
@@ -35,10 +37,25 @@ export class SystemSettingsService {
         throw new NotFoundException("System setting not found");
       }
 
-      setting.value = value;
-      return this.settings.save(setting);
+      setting.value = this.normalizeValue(value);
+      const saved = await this.settings.save(setting);
+      return this.toResponseDto(saved);
     } catch (error) {
       throw error;
     }
+  }
+
+  private normalizeValue(value: string): string {
+    if (value.toLowerCase() === "true") return "yes";
+    if (value.toLowerCase() === "false") return "no";
+    return value;
+  }
+
+  private toResponseDto(setting: SystemSetting): SystemSettingResponseDto {
+    return {
+      key: setting.key,
+      value: this.normalizeValue(setting.value),
+      description: setting.description,
+    };
   }
 }
