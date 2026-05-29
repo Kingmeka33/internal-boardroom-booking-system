@@ -11,7 +11,7 @@ export class AuditLogsService {
     private readonly auditLogs: Repository<AuditLog>,
   ) {}
 
-  async findAll(query: Record<string, string> = {}) {
+  async findAll(query: Record<string, string> = {}): Promise<AuditLog[]> {
     try {
       const qb = this.auditLogs
         .createQueryBuilder("audit")
@@ -48,7 +48,7 @@ export class AuditLogsService {
     after?: Record<string, unknown> | null;
     ipAddress?: string;
     userAgent?: string;
-  }) {
+  }): Promise<AuditLog> {
     try {
       return this.auditLogs.save(
         this.auditLogs.create({
