@@ -22,15 +22,18 @@ export class BoardroomsService {
     private readonly blocks: Repository<BoardroomBlock>,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<Boardroom[]> {
     try {
-      return this.rooms.find({ order: { name: "ASC" } });
+      return this.rooms.find({
+      relations: ["amenities"],
+      order: { name: "ASC" },
+   });
     } catch (error) {
       throw error;
     }
   }
 
-  async available(query: Record<string, string>) {
+  async available(query: Record<string, string>): Promise<Boardroom[]> {
     try {
       if (!query.startDateTime || !query.endDateTime) {
         throw new BadRequestException(
@@ -72,7 +75,7 @@ export class BoardroomsService {
     }
   }
 
-  async availability(id: string, date: string) {
+  async availability(id: string, date: string): Promise<any> {
     try {
       const room = await this.findOne(id);
       if (!date) throw new BadRequestException("date is required");
@@ -157,7 +160,7 @@ export class BoardroomsService {
     return null;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Boardroom> {
     try {
       const room = await this.rooms.findOne({ where: { id } });
       if (!room) throw new NotFoundException("Boardroom not found");
@@ -167,7 +170,7 @@ export class BoardroomsService {
     }
   }
 
-  async create(dto: CreateBoardroomDto) {
+  async create(dto: CreateBoardroomDto): Promise<Boardroom> {
     try {
       return this.rooms.save(this.rooms.create(dto));
     } catch (error) {
@@ -175,7 +178,7 @@ export class BoardroomsService {
     }
   }
 
-  async update(id: string, dto: Partial<CreateBoardroomDto>) {
+  async update(id: string, dto: Partial<CreateBoardroomDto>): Promise<Boardroom> {
     try {
       const room = await this.findOne(id);
       Object.assign(room, dto);
@@ -185,7 +188,7 @@ export class BoardroomsService {
     }
   }
 
-  async deactivate(id: string) {
+  async deactivate(id: string): Promise<Boardroom> {
     try {
       const room = await this.findOne(id);
       room.isActive = false;
@@ -196,7 +199,7 @@ export class BoardroomsService {
     }
   }
 
-  async assignAmenities(id: string, amenityIds: string[]) {
+  async assignAmenities(id: string, amenityIds: string[]): Promise<Boardroom> {
     try {
       const room = await this.findOne(id);
       room.amenities = await this.amenities.find({
