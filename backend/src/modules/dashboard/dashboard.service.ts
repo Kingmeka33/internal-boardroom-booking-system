@@ -13,7 +13,7 @@ export class DashboardService {
     private readonly rooms: Repository<Boardroom>,
   ) {}
 
-  async summary() {
+  async summary(): Promise<any> {
     try {
       const now = new Date();
       const startOfToday = new Date(
@@ -47,7 +47,7 @@ export class DashboardService {
       .getCount();
   }
 
-  async bookingsByStatus() {
+  async bookingsByStatus(): Promise<{ status: string; count: number }[]> {
     try {
       return this.bookings
         .createQueryBuilder("booking")
@@ -61,7 +61,7 @@ export class DashboardService {
     }
   }
 
-  async roomUtilisation() {
+  async roomUtilisation(): Promise<{ room: string; bookingCount: number; minutesBooked: number }[]> {
     try {
       return this.bookings
         .createQueryBuilder("booking")
@@ -80,11 +80,11 @@ export class DashboardService {
     }
   }
 
-  async bookingsByDepartment() {
+  async bookingsByDepartment(): Promise<{ department: string; count: number }[]> {
     try {
       return this.bookings
         .createQueryBuilder("booking")
-        .leftJoin("booking.bookedByUser", "user")
+        .leftJoinAndSelect("booking.bookedByUser", "user")
         .select("COALESCE(user.department, :unknown)", "department")
         .setParameter("unknown", "Unassigned")
         .addSelect("COUNT(*)", "count")
@@ -96,7 +96,7 @@ export class DashboardService {
     }
   }
 
-  async peakHours() {
+  async peakHours(): Promise<{ hour: number; count: number }[]> {
     try {
       return this.bookings
         .createQueryBuilder("booking")
@@ -110,7 +110,7 @@ export class DashboardService {
     }
   }
 
-  async mostUsedRooms() {
+  async mostUsedRooms(): Promise<{ room: string; bookingCount: number; minutesBooked: number }[]> {
     try {
       return this.roomUtilisation();
     } catch (error) {
