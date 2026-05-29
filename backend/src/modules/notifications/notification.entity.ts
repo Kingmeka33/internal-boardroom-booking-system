@@ -9,7 +9,7 @@ import { User } from "../users/user.entity";
 @Entity("notifications")
 export class Notification {
   @PrimaryGeneratedColumn("uuid") id: string;
-  @ManyToOne(() => User, { eager: true }) user: User;
+  @ManyToOne(() => User) user: User;
   @Column() title: string;
   @Column() message: string;
   @Column({ default: "INFO" }) type: string;
