@@ -11,23 +11,29 @@ export class UsersService {
     @InjectRepository(User) private users: Repository<User>,
     @InjectRepository(Role) private roles: Repository<Role>,
   ) {}
-  async findAll() {
+  async findAll(): Promise<User[]> {
     try {
-      return this.users.find({ order: { createdAt: "DESC" } });
+      return this.users.find({
+      relations: ["role"],
+      order: { createdAt: "DESC" },
+   });
     } catch (e) {
       throw e;
     }
   }
-  async findOne(id: string) {
+  async findOne(id: string): Promise<User> {
     try {
-      const u = await this.users.findOne({ where: { id } });
+      const u = await this.users.findOne({
+      where: { id },
+      relations: ["role"],
+  });
       if (!u) throw new NotFoundException("User not found");
       return u;
     } catch (e) {
       throw e;
     }
   }
-  async create(dto: CreateUserDto) {
+  async create(dto: CreateUserDto): Promise<User> {
     try {
       const role = await this.roles.findOne({ where: { id: dto.roleId } });
       if (!role) throw new NotFoundException("Role not found");
@@ -41,7 +47,7 @@ export class UsersService {
       throw e;
     }
   }
-  async deactivate(id: string) {
+  async deactivate(id: string): Promise<User> {
     try {
       const u = await this.findOne(id);
       u.isActive = false;
@@ -50,7 +56,7 @@ export class UsersService {
       throw e;
     }
   }
-  async assignRole(id: string, roleId: string) {
+  async assignRole(id: string, roleId: string): Promise<User> {
     try {
       const u = await this.findOne(id);
       const role = await this.roles.findOne({ where: { id: roleId } });
