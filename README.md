@@ -85,7 +85,3 @@ Backend Swagger: http://localhost:3000/api
 Frontend: http://localhost:4200
 ```
 
-
-## Step 8 Fix
-
-This version includes automatic migrations and startup seeding for roles, default users, amenities, settings and sample boardrooms. See `docs/STEP_8_MIGRATIONS_AND_SEEDING_FIX.md`.
