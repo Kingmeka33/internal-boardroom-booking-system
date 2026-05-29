@@ -10,7 +10,7 @@ export class AmenitiesService {
     @InjectRepository(Amenity) private readonly repo: Repository<Amenity>,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<Amenity[]> {
     try {
       return this.repo.find({ order: { name: "ASC" } });
     } catch (error) {
@@ -18,7 +18,7 @@ export class AmenitiesService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Amenity> {
     try {
       const amenity = await this.repo.findOne({ where: { id } });
       if (!amenity) throw new NotFoundException("Amenity not found");
@@ -28,7 +28,7 @@ export class AmenitiesService {
     }
   }
 
-  async create(payload: CreateAmenityDto) {
+  async create(payload: CreateAmenityDto): Promise<Amenity> {
     try {
       return this.repo.save(this.repo.create(payload));
     } catch (error) {
@@ -36,7 +36,7 @@ export class AmenitiesService {
     }
   }
 
-  async update(id: string, payload: Partial<CreateAmenityDto>) {
+  async update(id: string, payload: Partial<CreateAmenityDto>): Promise<Amenity> {
     try {
       const amenity = await this.findOne(id);
       Object.assign(amenity, payload);
@@ -46,7 +46,7 @@ export class AmenitiesService {
     }
   }
 
-  async deactivate(id: string) {
+  async deactivate(id: string): Promise<Amenity> {
     try {
       const amenity = await this.findOne(id);
       amenity.isActive = false;
