@@ -9,7 +9,6 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { IsNotEmpty, IsString } from "class-validator";
-import { IsNotEmpty } from "class-validator";
 import { Roles } from "../../shared/decorators/roles.decorator";
 import { RoleName } from "../../shared/enums/role-name.enum";
 import { RolesGuard } from "../../shared/guards/roles.guard";
@@ -23,10 +22,6 @@ class UpdateSettingDto {
   })
   @IsNotEmpty()
   @IsString()
-
-class UpdateSettingDto {
-  @ApiProperty({ example: "false" })
-  @IsNotEmpty()
   value: string;
 }
 
@@ -44,6 +39,9 @@ export class SystemSettingsController {
     type: [SystemSettingResponseDto],
     description: "Returns all system settings.",
   })
+  findAll() {
+    return this.systemSettingsService.findAll();
+  }
 
   @Patch(":key")
   @Roles(RoleName.ADMIN, RoleName.SUPER_ADMIN)
@@ -53,7 +51,6 @@ export class SystemSettingsController {
     type: SystemSettingResponseDto,
     description: "Setting updated successfully.",
   })
-
   update(@Param("key") key: string, @Body() dto: UpdateSettingDto) {
     return this.systemSettingsService.update(key, dto.value);
   }
