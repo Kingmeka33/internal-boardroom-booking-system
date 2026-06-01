@@ -10,7 +10,7 @@ export class SystemSettingsService {
     private readonly settings: Repository<SystemSetting>,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<SystemSetting[]> {
     try {
       return this.settings.find({ order: { key: "ASC" } });
     } catch (error) {
@@ -18,7 +18,7 @@ export class SystemSettingsService {
     }
   }
 
-  async getValue(key: string, fallback?: string) {
+  async getValue(key: string, fallback?: string): Promise<string | undefined> {
     try {
       const setting = await this.settings.findOne({ where: { key } });
       return setting?.value ?? fallback;
@@ -27,7 +27,7 @@ export class SystemSettingsService {
     }
   }
 
-  async update(key: string, value: string) {
+  async update(key: string, value: string): Promise<SystemSetting> {
     try {
       const setting = await this.settings.findOne({ where: { key } });
 
