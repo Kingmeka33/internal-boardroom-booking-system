@@ -44,15 +44,6 @@ export class SystemSettingsController {
     type: [SystemSettingResponseDto],
     description: "Returns all system settings.",
   })
-  async findAll(): Promise<SystemSettingResponseDto[]> {
-    try {
-      return await this.systemSettingsService.findAll();
-    } catch (e) {
-      throw e;
-    }
-  findAll() {
-    return this.systemSettingsService.findAll();
-  }
 
   @Patch(":key")
   @Roles(RoleName.ADMIN, RoleName.SUPER_ADMIN)
@@ -62,17 +53,7 @@ export class SystemSettingsController {
     type: SystemSettingResponseDto,
     description: "Setting updated successfully.",
   })
-  async update(
-    @Param("key") key: string,
-    @Body() dto: UpdateSettingDto,
-  ): Promise<SystemSettingResponseDto> {
-    try {
-      return await this.systemSettingsService.update(key, dto.value);
-    } catch (e) {
-      throw e;
-    }
-  }
-}
+
   update(@Param("key") key: string, @Body() dto: UpdateSettingDto) {
     return this.systemSettingsService.update(key, dto.value);
   }
