@@ -2,13 +2,14 @@ import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ApiService } from "../services/api.service";
+import { ToastService } from "../services/toast.service";
 
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="page">
-      <div class="page-header">
+    <section class="page admin-console">
+      <div class="page-header app-page-header">
         <div>
           <div class="eyebrow">Governance</div>
           <h1>Audit Logs</h1>
@@ -23,7 +24,13 @@ import { ApiService } from "../services/api.service";
         <div class="field action-field"><label>&nbsp;</label><button class="btn" type="button" (click)="load()">Search</button></div>
       </div>
 
-      <section class="card table-wrap">
+      <section class="card table-wrap admin-table-card">
+        <div class="section-toolbar">
+          <div>
+            <h2>Traceability records</h2>
+            <span class="muted small">{{ logs.length }} audit entries</span>
+          </div>
+        </div>
         <table>
           <thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>Actor</th><th>Record</th></tr></thead>
           <tbody>
@@ -31,8 +38,8 @@ import { ApiService } from "../services/api.service";
               <td>{{ log.createdAt | date: 'd MMM yyyy HH:mm' }}</td>
               <td><strong>{{ log.action }}</strong></td>
               <td>{{ log.entityName }}</td>
-              <td>{{ log.actorUserId || '-' }}</td>
-              <td>{{ log.entityId || '-' }}</td>
+              <td>{{ log.actorName || 'System' }}</td>
+              <td>{{ log.entityLabel || log.entityName }}</td>
             </tr>
           </tbody>
         </table>
@@ -44,7 +51,22 @@ import { ApiService } from "../services/api.service";
 export class AuditLogsComponent {
   logs: any[] = [];
   filters = { entityName: "", action: "" };
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly toast: ToastService,
+  ) {}
   ngOnInit() { this.load(); }
-  load() { this.api.auditLogs(this.filters).subscribe({ next: (res: any) => (this.logs = Array.isArray(res) ? res : []), error: () => (this.logs = []) }); }
+  load() {
+    this.api.auditLogs(this.filters).subscribe({
+      next: (res: any) => {
+        this.logs = Array.isArray(res) ? res : [];
+        this.toast.success("Audit logs loaded.");
+      },
+      error: (err) => {
+        this.logs = [];
+        const message = err?.error?.message || "Could not load audit logs.";
+        this.toast.error(Array.isArray(message) ? message.join(", ") : message);
+      },
+    });
+  }
 }
