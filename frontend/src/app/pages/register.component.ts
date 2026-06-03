@@ -3,6 +3,7 @@ import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "../services/auth.service";
+import { ToastService } from "../services/toast.service";
 
 @Component({
   standalone: true,
@@ -50,17 +51,6 @@ import { AuthService } from "../services/auth.service";
         </div>
 
         <div class="field">
-          <label>Role</label>
-          <select [(ngModel)]="roleName" name="roleName">
-            <option value="">Select role</option>
-            <option value="EMPLOYEE">Employee</option>
-            <option value="FACILITIES_MANAGER">Facilities Manager</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-          <small class="help-text">Your role controls the system features available after login.</small>
-        </div>
-
-        <div class="field">
           <label>Password</label>
           <input
             [(ngModel)]="password"
@@ -97,7 +87,6 @@ export class RegisterComponent {
   department = "";
   jobTitle = "";
   password = "";
-  roleName = "EMPLOYEE";
   message = "";
   isError = false;
   loading = false;
@@ -105,6 +94,7 @@ export class RegisterComponent {
   constructor(
     private readonly auth: AuthService,
     private readonly router: Router,
+    private readonly toast: ToastService,
   ) {}
 
   register() {
@@ -119,19 +109,24 @@ export class RegisterComponent {
         department: this.department,
         jobTitle: this.jobTitle,
         password: this.password,
-        roleName: this.roleName,
       })
       .subscribe({
         next: () => {
           this.loading = false;
+          this.toast.success("Employee account created successfully.");
           this.router.navigate(["/dashboard"]);
         },
-        error: () => {
+        error: (err) => {
           this.loading = false;
-          this.message =
-            "Registration failed. The email may already exist or required fields are missing.";
+          this.message = this.errorMessage(err, "Registration failed.");
           this.isError = true;
+          this.toast.error(this.message);
         },
       });
+  }
+
+  private errorMessage(err: any, fallback: string): string {
+    const message = err?.error?.message || fallback;
+    return Array.isArray(message) ? message.join(", ") : message;
   }
 }
