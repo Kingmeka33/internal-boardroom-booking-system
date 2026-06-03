@@ -3,13 +3,14 @@ import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 import { ApiService } from "../services/api.service";
+import { ToastService } from "../services/toast.service";
 
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <section class="page">
-      <div class="page-header">
+    <section class="page employee-experience">
+      <div class="page-header app-page-header">
         <div>
           <div class="eyebrow">Calendar</div>
           <h1>Booking calendar</h1>
@@ -18,7 +19,22 @@ import { ApiService } from "../services/api.service";
         <a class="btn" routerLink="/book">Create booking</a>
       </div>
 
-      <div class="card filters">
+      <div class="card filters calendar-filter-bar">
+        <div class="field">
+          <label>View</label>
+          <select [(ngModel)]="filters.viewMode" (change)="applyViewMode()">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Room</label>
+          <select [(ngModel)]="filters.boardroomId">
+            <option value="">All rooms</option>
+            <option *ngFor="let room of rooms" [value]="room.id">{{ room.name }}</option>
+          </select>
+        </div>
         <div class="field">
           <label>Start date</label>
           <input type="date" [(ngModel)]="filters.startDate" />
@@ -37,6 +53,7 @@ import { ApiService } from "../services/api.service";
             <option value="REJECTED">Rejected</option>
             <option value="COMPLETED">Completed</option>
             <option value="NO_SHOW">No show</option>
+            <option value="ROOM_BLOCK">Room blocks</option>
           </select>
         </div>
         <div class="field action-field">
@@ -45,14 +62,14 @@ import { ApiService } from "../services/api.service";
         </div>
       </div>
 
-      <div class="calendar-board">
+      <div class="calendar-board modern-calendar-board">
         <article *ngFor="let day of groupedDays" class="calendar-day-card">
           <div class="calendar-day-header">
             <strong>{{ day.date | date: "EEE, d MMM yyyy" }}</strong>
             <span>{{ day.events.length }} booking(s)</span>
           </div>
 
-          <div *ngFor="let event of day.events" class="calendar-event" [class.pending]="event.status === 'PENDING_APPROVAL'">
+          <div *ngFor="let event of day.events" class="calendar-event" [class.pending]="event.status === 'PENDING_APPROVAL'" [class.room-block]="event.status === 'ROOM_BLOCK'">
             <div class="event-time">{{ event.start | date: "HH:mm" }} - {{ event.end | date: "HH:mm" }}</div>
             <strong>{{ event.title }}</strong>
             <span>{{ event.boardroom || "Boardroom" }}</span>
@@ -71,17 +88,31 @@ import { ApiService } from "../services/api.service";
 export class BookingCalendarComponent {
   events: any[] = [];
   groupedDays: { date: Date; events: any[] }[] = [];
+  rooms: any[] = [];
 
   filters = {
-    startDate: this.dateOffset(-7),
-    endDate: this.dateOffset(30),
+    viewMode: "week",
+    startDate: this.dateOffset(0),
+    endDate: this.dateOffset(7),
     status: "",
+    boardroomId: "",
   };
 
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly toast: ToastService,
+  ) {}
 
   ngOnInit() {
+    this.loadRooms();
     this.load();
+  }
+
+  loadRooms() {
+    this.api.boardrooms().subscribe({
+      next: (res: any) => (this.rooms = Array.isArray(res) ? res : []),
+      error: () => (this.rooms = []),
+    });
   }
 
   load() {
@@ -90,6 +121,7 @@ export class BookingCalendarComponent {
         startDateTime: `${this.filters.startDate}T00:00:00.000Z`,
         endDateTime: `${this.filters.endDate}T23:59:59.000Z`,
         status: this.filters.status,
+        boardroomId: this.filters.boardroomId,
       })
       .subscribe({
         next: (res: any) => {
@@ -99,8 +131,18 @@ export class BookingCalendarComponent {
         error: () => {
           this.events = [];
           this.groupedDays = [];
+          this.toast.error("Could not load calendar events.");
         },
       });
+  }
+
+  applyViewMode() {
+    const start = new Date(`${this.filters.startDate}T00:00:00`);
+    const end = new Date(start);
+    if (this.filters.viewMode === "day") end.setDate(start.getDate());
+    if (this.filters.viewMode === "week") end.setDate(start.getDate() + 7);
+    if (this.filters.viewMode === "month") end.setMonth(start.getMonth() + 1);
+    this.filters.endDate = end.toISOString().slice(0, 10);
   }
 
   statusClass(status: string): string {
