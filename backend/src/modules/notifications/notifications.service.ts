@@ -2,6 +2,11 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "../users/user.entity";
+import {
+  NotificationActionResponseDto,
+  NotificationResponseDto,
+  UnreadNotificationCountResponseDto,
+} from "./dto/notification-response.dto";
 import { Notification } from "./notification.entity";
 
 @Injectable()
@@ -11,17 +16,21 @@ export class NotificationsService {
     private readonly notifications: Repository<Notification>,
   ) {}
 
+  async findForUser(user: User): Promise<NotificationResponseDto[]> {
   async findForUser(user: User): Promise<Notification[]> {
     try {
-      return this.notifications.find({
-        where: { user: { id: user.id } },
-        order: { createdAt: "DESC" },
-      });
+      return NotificationResponseDto.collection(
+        await this.notifications.find({
+          where: { user: { id: user.id } },
+          order: { createdAt: "DESC" },
+        }),
+      );
     } catch (error) {
       throw error;
     }
   }
 
+  async unreadCount(user: User): Promise<UnreadNotificationCountResponseDto> {
   async unreadCount(user: User): Promise<{ unread: number }> {
     try {
       return {
@@ -42,14 +51,16 @@ export class NotificationsService {
     metadata?: Record<string, unknown>,
   ): Promise<Notification> {
     try {
-      return this.notifications.save(
-        this.notifications.create({
-          user,
-          title,
-          message,
-          type,
-          metadata,
-        }),
+      return NotificationResponseDto.fromEntity(
+        await this.notifications.save(
+          this.notifications.create({
+            user,
+            title,
+            message,
+            type,
+            metadata,
+          }),
+        ),
       );
     } catch (error) {
       throw error;
@@ -67,7 +78,7 @@ export class NotificationsService {
       }
 
       notification.isRead = true;
-      return this.notifications.save(notification);
+      return NotificationResponseDto.fromEntity(await this.notifications.save(notification));
     } catch (error) {
       throw error;
     }
