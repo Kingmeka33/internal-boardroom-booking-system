@@ -14,6 +14,7 @@ export class AuditLogsService {
   ) {}
 
   async findAll(query: Record<string, string> = {}): Promise<any[]> {
+  async findAll(query: Record<string, string> = {}): Promise<AuditLog[]> {
     try {
       const qb = this.auditLogs
         .createQueryBuilder("audit")

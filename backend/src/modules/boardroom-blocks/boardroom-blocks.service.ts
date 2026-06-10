@@ -27,7 +27,7 @@ export class BoardroomBlocksService {
     private readonly users: Repository<User>,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<BoardroomBlock[]> {
     try {
       return this.blocks.find({ order: { startDateTime: "DESC" } });
     } catch (error) {
@@ -35,7 +35,7 @@ export class BoardroomBlocksService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<BoardroomBlock> {
     try {
       const block = await this.blocks.findOne({ where: { id } });
       if (!block) throw new NotFoundException("Room block not found");
@@ -45,7 +45,7 @@ export class BoardroomBlocksService {
     }
   }
 
-  async update(id: string, dto: Partial<CreateBoardroomBlockDto>, user?: User) {
+  async update(id: string, dto: Partial<CreateBoardroomBlockDto>, user?: User): Promise<BoardroomBlock> {
     try {
       const block = await this.findOne(id);
       const before = {
@@ -91,7 +91,7 @@ export class BoardroomBlocksService {
     }
   }
 
-  async create(dto: CreateBoardroomBlockDto, user: User) {
+  async create(dto: CreateBoardroomBlockDto, user: User): Promise<BoardroomBlock> {
     try {
       const room = await this.rooms.findOne({ where: { id: dto.boardroomId } });
       if (!room) throw new NotFoundException("Boardroom not found");
@@ -144,7 +144,7 @@ export class BoardroomBlocksService {
     }
   }
 
-  async deactivate(id: string, user: User) {
+  async deactivate(id: string, user: User): Promise<BoardroomBlock> {
     try {
       const block = await this.blocks.findOne({ where: { id } });
       if (!block) throw new NotFoundException("Room block not found");

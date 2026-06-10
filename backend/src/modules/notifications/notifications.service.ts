@@ -17,6 +17,7 @@ export class NotificationsService {
   ) {}
 
   async findForUser(user: User): Promise<NotificationResponseDto[]> {
+  async findForUser(user: User): Promise<Notification[]> {
     try {
       return NotificationResponseDto.collection(
         await this.notifications.find({
@@ -30,6 +31,7 @@ export class NotificationsService {
   }
 
   async unreadCount(user: User): Promise<UnreadNotificationCountResponseDto> {
+  async unreadCount(user: User): Promise<{ unread: number }> {
     try {
       return {
         unread: await this.notifications.count({
@@ -47,7 +49,7 @@ export class NotificationsService {
     message: string,
     type = "INFO",
     metadata?: Record<string, unknown>,
-  ): Promise<NotificationResponseDto> {
+  ): Promise<Notification> {
     try {
       return NotificationResponseDto.fromEntity(
         await this.notifications.save(
@@ -65,7 +67,7 @@ export class NotificationsService {
     }
   }
 
-  async markRead(id: string, user: User): Promise<NotificationResponseDto> {
+  async markRead(id: string, user: User): Promise<Notification> {
     try {
       const notification = await this.notifications.findOne({
         where: { id, user: { id: user.id } },
@@ -82,7 +84,7 @@ export class NotificationsService {
     }
   }
 
-  async markAllRead(user: User): Promise<NotificationActionResponseDto> {
+  async markAllRead(user: User): Promise<{ message: string }> {
     try {
       await this.notifications
         .createQueryBuilder()
