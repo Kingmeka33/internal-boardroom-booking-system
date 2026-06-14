@@ -436,18 +436,4 @@ http://localhost:3000
 
 ---
 
-# Author
 
-**Emeka Oramalu**
-
-Junior Full-Stack Developer | Cloud & Software Engineering Enthusiast
-
-Technologies:
-- NestJS
-- Angular
-- PostgreSQL
-- AWS
-- TypeScript
-- TypeORM
-
----
