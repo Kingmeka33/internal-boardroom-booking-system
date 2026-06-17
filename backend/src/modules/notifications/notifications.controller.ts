@@ -1,8 +1,13 @@
 import { Controller, Get, Param, Patch, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CurrentUser } from "../../shared/decorators/current-user.decorator";
 import { User } from "../users/user.entity";
+import {
+  NotificationActionResponseDto,
+  NotificationResponseDto,
+  UnreadNotificationCountResponseDto,
+} from "./dto/notification-response.dto";
 import { NotificationsService } from "./notifications.service";
 
 @ApiTags("Notifications")
@@ -14,7 +19,8 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: "Get notifications for the signed-in user" })
-  findMine(@CurrentUser() user: User) {
+  @ApiOkResponse({ type: [NotificationResponseDto] })
+  findMine(@CurrentUser() user: User): Promise<NotificationResponseDto[]> {
     return this.notificationsService.findForUser(user);
   }
 
@@ -22,19 +28,29 @@ export class NotificationsController {
   @ApiOperation({
     summary: "Get unread notification count for the signed-in user",
   })
-  unreadCount(@CurrentUser() user: User) {
+  @ApiOkResponse({ type: UnreadNotificationCountResponseDto })
+  unreadCount(
+    @CurrentUser() user: User,
+  ): Promise<UnreadNotificationCountResponseDto> {
     return this.notificationsService.unreadCount(user);
   }
 
   @Patch(":id/read")
   @ApiOperation({ summary: "Mark a notification as read" })
-  markRead(@Param("id") id: string, @CurrentUser() user: User) {
+  @ApiOkResponse({ type: NotificationResponseDto })
+  markRead(
+    @Param("id") id: string,
+    @CurrentUser() user: User,
+  ): Promise<NotificationResponseDto> {
     return this.notificationsService.markRead(id, user);
   }
 
   @Patch("mark-all-read")
   @ApiOperation({ summary: "Mark all signed-in user notifications as read" })
-  markAllRead(@CurrentUser() user: User) {
+  @ApiOkResponse({ type: NotificationActionResponseDto })
+  markAllRead(
+    @CurrentUser() user: User,
+  ): Promise<NotificationActionResponseDto> {
     return this.notificationsService.markAllRead(user);
   }
 }

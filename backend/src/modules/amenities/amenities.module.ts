@@ -19,7 +19,7 @@ import { JwtAuthGuard } from "./shared/guards/jwt-auth.guard";
 import { RolesGuard } from "./shared/guards/roles.guard";
 import * as Joi from "joi";
 import { ConfigService } from "@nestjs/config";
- 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,17 +35,17 @@ import { ConfigService } from "@nestjs/config";
     DATABASE_USER: Joi.string().required(),
     DATABASE_PASSWORD: Joi.string().required(),
     DATABASE_NAME: Joi.string().required(),
- 
+
     JWT_ACCESS_SECRET: Joi.string().required(),
     JWT_REFRESH_SECRET: Joi.string().required(),
- 
+
     JWT_ACCESS_EXPIRES_IN: Joi.string().required(),
     JWT_REFRESH_EXPIRES_IN: Joi.string().required(),
- 
+
     FRONTEND_URL: Joi.string().required(),
   }),
 }),
- 
+
     TypeOrmModule.forRootAsync({
   inject: [ConfigService],
   useFactory: (configService: ConfigService) => ({
@@ -61,7 +61,7 @@ import { ConfigService } from "@nestjs/config";
     migrations: [__dirname + "/database/migrations/*{.ts,.js}"],
   }),
 }),
- 
+
     DatabaseModule,
     AuthModule,
     UsersModule,
@@ -76,7 +76,7 @@ import { ConfigService } from "@nestjs/config";
     DashboardModule,
     SystemSettingsModule,
   ],
- 
+
   providers: [
     {
       provide: APP_GUARD,
@@ -88,6 +88,5 @@ import { ConfigService } from "@nestjs/config";
     },
   ],
 })
- 
+
 export class AppModule {}
- 
