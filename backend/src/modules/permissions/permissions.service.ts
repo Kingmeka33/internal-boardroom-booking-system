@@ -7,16 +7,17 @@ export class PermissionsService {
   constructor(
     @InjectRepository(Permission) private repo: Repository<Permission>,
   ) {}
-  async findAll() {
+  async findAll(): Promise<Permission[]> {
     try {
       return this.repo.find();
     } catch (e) {
       throw e;
     }
   }
-  async create(payload: any) {
+  async create(payload: any): Promise<Permission | Permission[]> {
     try {
-      return this.repo.save(this.repo.create(payload));
+      const entity = this.repo.create(payload);
+      return this.repo.save(entity);
     } catch (e) {
       throw e;
     }

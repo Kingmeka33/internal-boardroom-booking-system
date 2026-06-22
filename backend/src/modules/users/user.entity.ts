@@ -17,7 +17,7 @@ export class User {
   @Column({ nullable: true }) phoneNumber?: string;
   @Column({ nullable: true }) department?: string;
   @Column({ nullable: true }) jobTitle?: string;
-  @ManyToOne(() => Role, (r) => r.users, { eager: true }) role: Role;
+  @ManyToOne(() => Role, (r) => r.users) role: Role;
   @Column({ default: true }) isActive: boolean;
   @Column({ nullable: true }) refreshTokenHash?: string;
   @CreateDateColumn() createdAt: Date;

@@ -12,8 +12,8 @@ import { User } from "../users/user.entity";
 @Entity("bookings")
 export class Booking {
   @PrimaryGeneratedColumn("uuid") id: string;
-  @ManyToOne(() => Boardroom, { eager: true }) boardroom: Boardroom;
-  @ManyToOne(() => User, { eager: true }) bookedByUser: User;
+  @ManyToOne(() => Boardroom) boardroom: Boardroom;
+  @ManyToOne(() => User) bookedByUser: User;
   @Column() title: string;
   @Column({ nullable: true }) description?: string;
   @Column({ type: "timestamptz" }) startDateTime: Date;
@@ -31,8 +31,8 @@ export class Booking {
   @Column({ default: false }) requiresSetup: boolean;
   @Column({ nullable: true }) setupNotes?: string;
   @Column({ nullable: true }) cancellationReason?: string;
-  @ManyToOne(() => User, { nullable: true, eager: true }) approvedByUser?: User;
-  @ManyToOne(() => User, { nullable: true, eager: true }) rejectedByUser?: User;
+  @ManyToOne(() => User, { nullable: true }) approvedByUser?: User;
+  @ManyToOne(() => User, { nullable: true }) rejectedByUser?: User;
   @Column({ nullable: true }) rejectionReason?: string;
   @Column({ type: "timestamptz", nullable: true }) approvedAt?: Date;
   @Column({ type: "timestamptz", nullable: true }) rejectedAt?: Date;
