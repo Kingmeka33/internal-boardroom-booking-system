@@ -13,7 +13,7 @@ export class Role {
   @Column({ unique: true }) name: string;
   @Column({ nullable: true }) description?: string;
   @Column({ default: false }) isSystemRole: boolean;
-  @ManyToMany(() => Permission, (p) => p.roles, { eager: true })
+  @ManyToMany(() => Permission, (p) => p.roles)
   permissions: Permission[];
   @OneToMany(() => User, (u) => u.role) users: User[];
 }

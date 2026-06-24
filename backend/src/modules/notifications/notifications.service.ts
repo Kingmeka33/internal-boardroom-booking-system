@@ -2,6 +2,11 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "../users/user.entity";
+import {
+  NotificationActionResponseDto,
+  NotificationResponseDto,
+  UnreadNotificationCountResponseDto,
+} from "./dto/notification-response.dto";
 import { Notification } from "./notification.entity";
 
 @Injectable()
@@ -11,18 +16,22 @@ export class NotificationsService {
     private readonly notifications: Repository<Notification>,
   ) {}
 
-  async findForUser(user: User) {
+  async findForUser(user: User): Promise<NotificationResponseDto[]> {
+  async findForUser(user: User): Promise<Notification[]> {
     try {
-      return this.notifications.find({
-        where: { user: { id: user.id } },
-        order: { createdAt: "DESC" },
-      });
+      return NotificationResponseDto.collection(
+        await this.notifications.find({
+          where: { user: { id: user.id } },
+          order: { createdAt: "DESC" },
+        }),
+      );
     } catch (error) {
       throw error;
     }
   }
 
-  async unreadCount(user: User) {
+  async unreadCount(user: User): Promise<UnreadNotificationCountResponseDto> {
+  async unreadCount(user: User): Promise<{ unread: number }> {
     try {
       return {
         unread: await this.notifications.count({
@@ -40,23 +49,25 @@ export class NotificationsService {
     message: string,
     type = "INFO",
     metadata?: Record<string, unknown>,
-  ) {
+  ): Promise<Notification> {
     try {
-      return this.notifications.save(
-        this.notifications.create({
-          user,
-          title,
-          message,
-          type,
-          metadata,
-        }),
+      return NotificationResponseDto.fromEntity(
+        await this.notifications.save(
+          this.notifications.create({
+            user,
+            title,
+            message,
+            type,
+            metadata,
+          }),
+        ),
       );
     } catch (error) {
       throw error;
     }
   }
 
-  async markRead(id: string, user: User) {
+  async markRead(id: string, user: User): Promise<Notification> {
     try {
       const notification = await this.notifications.findOne({
         where: { id, user: { id: user.id } },
@@ -67,13 +78,13 @@ export class NotificationsService {
       }
 
       notification.isRead = true;
-      return this.notifications.save(notification);
+      return NotificationResponseDto.fromEntity(await this.notifications.save(notification));
     } catch (error) {
       throw error;
     }
   }
 
-  async markAllRead(user: User) {
+  async markAllRead(user: User): Promise<{ message: string }> {
     try {
       await this.notifications
         .createQueryBuilder()
