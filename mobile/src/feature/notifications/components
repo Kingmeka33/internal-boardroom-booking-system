@@ -1,0 +1,88 @@
+import { useEffect } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useAppDispatch, useAppSelector } from "@app/hooks";
+import { navigationRef } from "@app/navigation/navigation-ref";
+import { colors, radii, shadows, spacing, typography } from "@shared/design-system/tokens";
+import { removeNotification } from "../notification-slice";
+
+export function InAppNotificationHost() {
+  const dispatch = useAppDispatch();
+  const notification = useAppSelector((state) => state.notifications.items[0]);
+
+  useEffect(() => {
+    if (!notification) return;
+    const timeout = setTimeout(() => {
+      dispatch(removeNotification(notification.id));
+    }, 6500);
+
+    return () => clearTimeout(timeout);
+  }, [dispatch, notification]);
+
+  if (!notification) return null;
+
+  return (
+    <View pointerEvents="box-none" style={styles.host}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Open notifications"
+        onPress={() => {
+          dispatch(removeNotification(notification.id));
+          if (navigationRef.isReady()) {
+            navigationRef.navigate("Notifications");
+          }
+        }}
+        style={({ pressed }) => [
+          styles.banner,
+          notification.level === "error" && styles.error,
+          notification.level === "success" && styles.success,
+          pressed && styles.pressed
+        ]}
+      >
+        <Text numberOfLines={1} style={styles.title}>
+          {notification.title}
+        </Text>
+        <Text numberOfLines={2} style={styles.message}>
+          {notification.message}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  host: {
+    left: spacing.lg,
+    position: "absolute",
+    right: spacing.lg,
+    top: spacing.xxl,
+    zIndex: 50
+  },
+  banner: {
+    ...shadows.card,
+    backgroundColor: colors.surface,
+    borderColor: colors.primary,
+    borderLeftWidth: 5,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    padding: spacing.lg
+  },
+  error: {
+    borderColor: colors.danger
+  },
+  success: {
+    borderColor: colors.success
+  },
+  message: {
+    color: colors.textMuted,
+    fontSize: typography.small,
+    marginTop: spacing.xs
+  },
+  pressed: {
+    opacity: 0.92
+  },
+  title: {
+    color: colors.text,
+    fontSize: typography.body,
+    fontWeight: "800"
+  }
+});
